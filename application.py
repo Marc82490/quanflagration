@@ -1,8 +1,11 @@
 from flask import Flask, render_template, request, url_for
 from flask_session import Session
+from flask_sqlalchemy import SQLAlchemy
 from tempfile import mkdtemp
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quan.db'
+db = SQLAlchemy(app)
 
 # ensure responses aren't cached
 if app.config["DEBUG"]:
@@ -24,9 +27,12 @@ Session(app)
 def index():
     return render_template("index.html")
 
-# @app.route('/')
+@app.route('/chart')
+def chart():
+    return render_template("graph.html")
 
 
+# shutdown server, for debugging purposes only
 def shutdown_server():
     func = request.environ.get('werkzeug.server.shutdown')
     if func is None:
