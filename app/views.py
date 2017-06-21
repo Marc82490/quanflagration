@@ -1,5 +1,5 @@
-from flask import render_template
-from app import app
+from flask import jsonify, request, render_template
+from app import app, db, models
 
 
 @app.route('/')
@@ -9,7 +9,22 @@ def index():
 
 @app.route('/chart')
 def chart():
-    return render_template("graph.html")
+    return render_template("chart.html")
+
+@app.route('/search')
+def search():
+    """ Search for places that match entry """
+
+    # get query from GET request and append wildcard
+    q = request.args.get("q")
+
+    # select rows from the database that are LIKE the query
+    rows = models.Symbol.query.filter(models.Symbol.ticker_symbol.like(q+'%')).all()
+    results=[row.serialize() for row in rows]
+    print(results)
+    
+    # return the rows in JSON format
+    return jsonify(results)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():

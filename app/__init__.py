@@ -8,6 +8,7 @@ from tempfile import mkdtemp
 
 # initialize Flask instance
 app = Flask(__name__)
+app.config.from_object('config')
 db = SQLAlchemy(app)
 
 from app import views, models
