@@ -2,7 +2,6 @@ from flask import jsonify, request, render_template
 from app import app, db, models, helpers
 from werkzeug.security import generate_password_hash, check_password_hash
 
-
 @app.route('/')
 @app.route('/index')
 def index():
