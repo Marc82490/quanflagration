@@ -1,4 +1,4 @@
-from flask import jsonify, request, render_template
+from flask import jsonify, request, render_template, redirect, url_for
 from app import app, db, models, helpers
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -27,22 +27,21 @@ def search():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    return 'TODO'
     # """Log user in."""
 
     # # forget any user_id
-    # session.clear()
+    session.clear()
 
     # # if user reached route via POST (as by submitting a form via POST)
-    # if request.method == "POST":
+    if request.method == "POST":
 
     #     # ensure username was submitted
-    #     if not request.form.get("username"):
-    #         return 'Invalid username'
+        if not request.form.get("username"):
+            return 'Invalid username'
 
     #     # ensure password was submitted
-    #     elif not request.form.get("password"):
-    #         return 'Invalid password'
+        elif not request.form.get("password"):
+            return 'Invalid password'
 
     #     # query database for username
 
@@ -51,14 +50,14 @@ def login():
 
 
     #     # remember which user has logged in
-    #     session["user_id"] = rows[0]["id"]
+        session["user_id"] = rows[0]["id"]
 
     #     # redirect user to home page
-    #     return redirect(url_for("index"))
+        return redirect(url_for("index"))
 
     # # else if user reached route via GET (as by clicking a link or via redirect)
-    # else:
-    #     return render_template("login.html")
+    else:
+        return render_template("login.html")
 
 @app.route("/logout")
 @helpers.login_required
@@ -67,10 +66,10 @@ def logout():
     # """Log user out."""
 
     # # forget any user_id
-    # session.clear()
+    session.clear()
 
     # # redirect user to login form
-    # return redirect(url_for("login"))
+    return redirect(url_for("login"))
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -80,24 +79,28 @@ def register():
         
         # check that user provided a username
         if not request.form.get("username"):
-            return 'Must provide username'
+            return render_template("error.html", error="Please provide username.")
         
         # check that username is unique by querying database
-        # rows = db.execute("SELECT * FROM users WHERE username = :username", username=request.form.get("username"))
-        # if rows:
-        #     return 'Username already taken'
+        username = request.form.get("username")
+        rows = models.User.query.filter_by(user_name=username).first()
+        print(rows)
+
+        if rows:
+            return render_template("error.html", error="Username already taken")
         
         # check that password and confirmation are both provided
         if not request.form.get("password") or not request.form.get("confirmation"):
-            return 'Must provide and confirm password'
+            return render_template("error.html", error="Please provide and confirm password.")
         
         # check that password and confirmation match
         if request.form.get("password") != request.form.get("confirmation"):
-            return 'Passwords must match'
+            return render_template("error.html", error="Passwords must match.")
         
         # insert new user
-        # db.execute("INSERT INTO users (username, hash) VALUES(:username, :hash)", username=request.form["username"], \
-        #     hash=generate_password_hash(request.form["password"]))
+        new_user = models.User(user_name=username, pass_hash=generate_password_hash(request.form["password"]))
+        db.session.add(new_user)
+        db.session.commit()
         
         # redirect user
         return redirect(url_for("index"))

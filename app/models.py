@@ -20,4 +20,8 @@ class User(db.Model):
     Create class for SQLite table holding user information
     """
     id = db.Column(db.Integer, primary_key=True)
-    hash = db.Column(db.Text)
+    user_name = db.Column(db.Text, index=True, unique=True)
+    pass_hash = db.Column(db.Text)
+
+    def __repr__(self):
+        return '%r' % self.user_name
