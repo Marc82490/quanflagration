@@ -1,5 +1,6 @@
 from flask import jsonify, request, render_template
-from app import app, db, models
+from app import app, db, models, helpers
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 @app.route('/')
@@ -21,7 +22,6 @@ def search():
     # select rows from the database that are LIKE the query
     rows = models.Symbol.query.filter(models.Symbol.ticker_symbol.like(q+'%')).all()
     results=[row.serialize() for row in rows]
-    print(results)
     
     # return the rows in JSON format
     return jsonify(results)
@@ -62,6 +62,7 @@ def login():
     #     return render_template("login.html")
 
 @app.route("/logout")
+@helpers.login_required
 def logout():
     return 'TODO'
     # """Log user out."""
@@ -71,3 +72,37 @@ def logout():
 
     # # redirect user to login form
     # return redirect(url_for("login"))
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    """ Register user """
+    # if reached by POST, as by submitting form
+    if request.method == "POST":
+        
+        # check that user provided a username
+        if not request.form.get("username"):
+            return 'Must provide username'
+        
+        # check that username is unique by querying database
+        # rows = db.execute("SELECT * FROM users WHERE username = :username", username=request.form.get("username"))
+        # if rows:
+        #     return 'Username already taken'
+        
+        # check that password and confirmation are both provided
+        if not request.form.get("password") or not request.form.get("confirmation"):
+            return 'Must provide and confirm password'
+        
+        # check that password and confirmation match
+        if request.form.get("password") != request.form.get("confirmation"):
+            return 'Passwords must match'
+        
+        # insert new user
+        # db.execute("INSERT INTO users (username, hash) VALUES(:username, :hash)", username=request.form["username"], \
+        #     hash=generate_password_hash(request.form["password"]))
+        
+        # redirect user
+        return redirect(url_for("index"))
+    
+    # if reached by GET, as by link or redirect
+    else:
+        return render_template("register.html")

@@ -3,6 +3,7 @@ $(function(){
 });
 
 function configure(){
+    // configure typeahead's display results
     $("#q").typeahead({
         highlight: false,
         minLength: 1
